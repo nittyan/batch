@@ -4,10 +4,12 @@ from typing import List
 from typing import TypeVar
 
 
-O = TypeVar('O')
-P = TypeVar('P')
-R = TypeVar('R')
-T = TypeVar('T', bound='Task[P, R]')
+O = TypeVar('O')               # batch output type
+P = TypeVar('P')               # batch parameter type
+R = TypeVar('R')               # task result type
+TP = TypeVar('TP')
+TR = TypeVar('TR')
+T = TypeVar('T', bound='Task[TP, TR]')
 
 
 class Job:
@@ -19,9 +21,15 @@ class Job:
         pass
 
 
+class Converter(Generic[R, O]):
+
+    def convert(self, r: R) -> O:
+        pass
+
+
 class SimpleJob(Generic[P, O], Job):
 
-    def __init__(self, name: str, parameters: List[P], task: T, converter: 'Converter[R, O]'):
+    def __init__(self, name: str, parameters: List[P], task: T, converter: Converter[TR, O]):
         super().__init__(name)
         self._parameters = parameters
         self._task = task
@@ -32,7 +40,10 @@ class SimpleJob(Generic[P, O], Job):
         simplest default implementation
         :return:
         """
-        return [self._converter.convert(self._task.execute(p)) for p in self._parameters]
+        try:
+            return [self._converter.convert(self._task.execute(p)) for p in self._parameters]
+        except Exception as e:
+            raise BatchError()
 
     @property
     def name(self):
@@ -42,12 +53,6 @@ class SimpleJob(Generic[P, O], Job):
 class Task(Generic[P, R]):
 
     def execute(self, param: P) -> R:
-        pass
-
-
-class Converter(Generic[R, O]):
-
-    def convert(self, r: R) -> O:
         pass
 
 
