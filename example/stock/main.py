@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import codecs
 
+from typing import Dict
 from typing import List
 
 import requests
@@ -21,15 +22,15 @@ class Stock:
         self._data = {}
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def data(self):
+    def data(self) -> Dict:
         return self._data
 
     @data.setter
-    def data(self, data: dict):
+    def data(self, data: Dict):
         self._data = data
 
 
